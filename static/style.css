@@ -1,0 +1,94 @@
+/* ===== Reset e layout ===== */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #0b0b0b;
+  color: #eee;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  display: block;
+}
+
+header h1 {
+  font-size: 1.4em;
+  color: #ff6b6b;
+}
+
+nav a {
+  color: #ff6b6b;
+  text-decoration: none;
+  margin: 0 6px;
+  position: center;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+.card {
+  background: #121212;
+  border-radius: 8px;
+  padding: 18px;
+  margin-top: 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+
+footer.small {
+  font-size: 0.9em;
+  color: #bbb;
+  margin-top: 14px;
+  text-align: center;
+}
+
+/* ===== Formulário ===== */
+label {
+  display: block;
+  margin-top: 8px;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #0f0f0f;
+  color: #eee;
+}
+
+button {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #ff6b6b;
+  color: #111;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ff4040;
+}
+
+/* ===== Mensagens ===== */
+.note {
+  background: #101820;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 8px;
+  color: #fff;
+}
+
+.error {
+  background: #3b1212;
+  color: #ffd7d7;
+  padding: 8px;
+  border-radius: 6px;
+}

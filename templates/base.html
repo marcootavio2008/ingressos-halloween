@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Baile Halloween - {{ title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+
+</head>
+<body>
+  <header>
+    <h1>Baile de Halloween</h1>
+    <nav>
+      <a href="{{ url_for('about') }}">Sobre</a> |
+      <a href="{{ url_for('buy') }}">Comprar Ingresso</a>
+    </nav>
+
+  </header>
+
+  <main>
+    <div class="card">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for cat, msg in messages %}
+            <div class="{{ 'error' if cat=='error' else 'note' }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+
+    <footer class="small">
+      Organização do evento • Verifique identidade para ingressos VIP (maiores de 18 anos)
+    </footer>
+  </main>
+</body>
+</html>

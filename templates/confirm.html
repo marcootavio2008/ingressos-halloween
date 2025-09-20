@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Confirmação de inscrição</h2>
+<p>Obrigado, <strong>{{ name }}</strong>! Sua solicitação foi registrada.</p>
+<ul>
+  <li><strong>Tipo de ingresso:</strong> {{ ticket_type }}</li>
+  <li><strong>Email:</strong> {{ email }}</li>
+</ul>
+<p class="small">
+  Lembre-se: pague usando a chave PIX informada e leve comprovante e documento de identidade (obrigatório para VIP).
+</p>
+{% endblock %}
