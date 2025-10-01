@@ -38,7 +38,7 @@ def buy():
     preference_data = {
         "items": [
             {
-                "title": f"Ingresso {ticket_type.upper()}",
+                "title": "Ingresso",
                 "quantity": 1,
                 "unit_price": 47.5
             }
@@ -53,7 +53,7 @@ def buy():
     }
 
     pref = sdk.preference().create(preference_data)
-    init_point = pref["init_point"]
+    init_point = pref["response"]["init_point"]
 
     return redirect(init_point)
 
