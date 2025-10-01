@@ -1,7 +1,6 @@
 /* ===== Reset e layout ===== */
 body {
   background-image: url(unnamed.jpg);
-  font-family: Arial, Helvetica, sans-serif;
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
@@ -13,12 +12,10 @@ header {
   align-items: center;
   text-align: center;
   display: block;
-  background-image: url(morcego.jpg);
-
 }
 
 header h1 {
-  font-size: 1.6em;
+  font-size: 1.7em;
   color: #944ae8;
   font-family: Brush Script MT;
 }
