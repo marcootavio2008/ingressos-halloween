@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = 'cx1228@'  # necessário para flash messages
 
 # coloque seu access token (sandbox ou produção) no ambiente
-MERCADO_TOKEN = os.getenv("APP_USR-8965396489010178-100118-88682f7280895d5fc63c4ad811f40428-2726179168")
+MERCADO_TOKEN = "APP_USR-8965396489010178-100118-88682f7280895d5fc63c4ad811f40428-2726179168"
 sdk = mercadopago.SDK(MERCADO_TOKEN)
 
 
