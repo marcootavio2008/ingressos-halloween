@@ -13,12 +13,13 @@ header {
   align-items: center;
   text-align: center;
   display: block;
+  background-image: url(morcego.jpg);
+
 }
 
 header h1 {
   font-size: 1.4em;
   color: #944ae8;
-  background-image: url(morcego.jpg);
 }
 
 nav a {
