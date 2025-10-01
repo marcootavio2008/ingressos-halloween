@@ -35,7 +35,7 @@ def buy():
         return redirect(url_for("buy"))
 
     # preço do ingresso
-    price = 50.0 if ticket_type == "comum" else 100.0
+    price = 47.5 if ticket_type == "comum" else 100.0
 
     # cria preferência
     preference_data = {
