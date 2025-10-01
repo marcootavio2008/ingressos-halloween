@@ -12,12 +12,14 @@ header {
   align-items: center;
   text-align: center;
   display: block;
+  font-family: "Irish Grover", system-ui;
+  font-weight: 400;
+  font-style: normal;
 }
 
 header h1 {
   font-size: 1.7em;
   color: #944ae8;
-  font-family: Brush Script MT;
 }
 
 nav a {
