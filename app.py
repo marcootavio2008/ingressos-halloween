@@ -1,50 +1,80 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
 import os
-import re
-from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for, flash
+import mercadopago
 
 app = Flask(__name__)
 app.secret_key = 'cx1228@'  # necessário para flash messages
 
-# --- CONFIG ---
-PIX_KEY = '011a7ecd-24c3-4552-bbd0-e09510ad4093'  # <--- troque para sua chave PIX real
+# coloque seu access token (sandbox ou produção) no ambiente
+MERCADO_TOKEN = os.getenv("MERCADOPAGO_ACCESS_TOKEN")
+sdk = mercadopago.SDK(MERCADO_TOKEN) if MERCADO_TOKEN else None
 
-# --- Rotas ---
-@app.route('/')
+
+@app.route("/")
 def home():
-    return redirect(url_for('about'))
+    return redirect(url_for("about"))
 
-@app.route('/about')
+
+@app.route("/about")
 def about():
-    # Adiciona botão para ir para a página de compra
-    return render_template('about.html', title='Sobre', buy_url=url_for('buy'))
+    return render_template("about.html")
 
-@app.route('/buy', methods=['GET', 'POST'])
+
+@app.route("/buy", methods=["GET", "POST"])
 def buy():
-    if request.method == 'GET':
-        return render_template('buy.html', title='Comprar', pix_key=PIX_KEY, home_url=url_for('about'))
+    if request.method == "GET":
+        return render_template("buy.html")
 
-    name = request.form.get('name', '').strip()
-    email = request.form.get('email', '').strip()
-    age_raw = request.form.get('age', '').strip()
-    ticket_type = request.form.get('ticket_type', 'comum')
+    # POST → dados do formulário
+    name = request.form.get("name")
+    age = request.form.get("age")
+    ticket_type = request.form.get("ticket_type", "comum")
 
-    if not name or not email:
-        flash('Nome e email são obrigatórios.', 'error')
-        return redirect(url_for('buy'))
+    if not sdk:
+        flash("Erro: Mercado Pago não configurado.", "error")
+        return redirect(url_for("buy"))
 
-    try:
-        age = int(age_raw)
-    except ValueError:
-        flash('Idade inválida.', 'error')
-        return redirect(url_for('buy'))
+    # preço do ingresso
+    price = 50.0 if ticket_type == "comum" else 100.0
 
-    if ticket_type == 'vip' and age < 18:
-        flash('Ingresso VIP somente para maiores de 18 anos.', 'error')
-        return redirect(url_for('buy'))
+    # cria preferência
+    preference_data = {
+        "items": [
+            {
+                "title": f"Ingresso {ticket_type.upper()}",
+                "quantity": 1,
+                "unit_price": price
+            }
+        ],
+        "payer": {"name": name},
+        "back_urls": {
+            "success": url_for("success", _external=True),
+            "failure": url_for("failure", _external=True),
+            "pending": url_for("pending", _external=True),
+        },
+        "auto_return": "approved",
+    }
 
-    return render_template('confirm.html', title='Confirmado',
-                           name=name, email=email, ticket_type=ticket_type, home_url=url_for('about'))
+    pref = sdk.preference().create(preference_data)
+    init_point = pref["response"]["init_point"]
 
-if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+    return redirect(init_point)
+
+
+@app.route("/success")
+def success():
+    return render_template("success.html", status="Pagamento aprovado 🎉")
+
+
+@app.route("/failure")
+def failure():
+    return render_template("success.html", status="Pagamento não aprovado ❌")
+
+
+@app.route("/pending")
+def pending():
+    return render_template("success.html", status="Pagamento pendente ⏳")
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=8000)
