@@ -1,38 +1,15 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-<h2>Comprar Ingresso</h2>
-<form method="post" action="{{ url_for('buy') }}">
-  <label>Nome completo
-    <input type="text" name="name" required maxlength="120" placeholder="Seu nome completo">
-  </label>
-
-  <label>Email
-    <input type="email" name="email" required placeholder="seu@email.com">
-  </label>
-
-  <label>Idade
-    <input type="number" name="age" required min="0" max="120" value="18">
-  </label>
-
-  <label>Tipo de ingresso
+<h2>Comprar ingresso</h2>
+<form method="post">
+  <p><input type="text" name="name" placeholder="Seu nome" required></p>
+  <p><input type="number" name="age" placeholder="Idade" required></p>
+  <p>
     <select name="ticket_type">
-      <option value="comum">Convite Comum — Entrada básica</option>
-      <option value="vip">Convite VIP — Acesso à área VIP (maiores de 18 anos)</option>
+      <option value="comum">Convite Comum - R$47,50</option>
+      <option value="vip">Convite VIP - R$100</option>
     </select>
-  </label>
-
-  <div class="note">
-    <strong>Pagamento via PIX</strong><br>
-    Chave PIX: <code>{{ pix_key }}</code><br>
-    Depois de realizar o pagamento, preencha os dados e clique em <em>Confirmar compra</em>.
-    Enviaremos uma confirmação automática.
-    <strong>ATENÇÃO!</strong>
-    <ul>
-    <li>O convite VIP, custa R$: 60,00;
-    <li>O convite comum, custa R$: 45,00.
-    </ul>
-  </div>
-
-  <button type="submit">Confirmar compra</button>
+  </p>
+  <p><button type="submit">Pagar com Mercado Pago</button></p>
 </form>
 {% endblock %}
