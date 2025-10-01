@@ -1,5 +1,6 @@
 /* ===== Reset e layout ===== */
 body {
+  background-image: url(static/unnamed.jpg);
   font-family: Arial, Helvetica, sans-serif;
   max-width: 900px;
   margin: 0 auto;
