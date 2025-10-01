@@ -7,7 +7,7 @@ app.secret_key = 'cx1228@'  # necessário para flash messages
 
 # coloque seu access token (sandbox ou produção) no ambiente
 MERCADO_TOKEN = os.getenv("APP_USR-8965396489010178-100118-88682f7280895d5fc63c4ad811f40428-2726179168")
-sdk = mercadopago.SDK(MERCADO_TOKEN) if MERCADO_TOKEN else None
+sdk = mercadopago.SDK(MERCADO_TOKEN)
 
 
 @app.route("/")
@@ -34,16 +34,13 @@ def buy():
         flash("Erro: Mercado Pago não configurado.", "error")
         return redirect(url_for("buy"))
 
-    # preço do ingresso
-    price = 47.5 if ticket_type == "comum" else 100.0
-
     # cria preferência
     preference_data = {
         "items": [
             {
                 "title": f"Ingresso {ticket_type.upper()}",
                 "quantity": 1,
-                "unit_price": price
+                "unit_price": 47.5
             }
         ],
         "payer": {"name": name},
@@ -56,7 +53,7 @@ def buy():
     }
 
     pref = sdk.preference().create(preference_data)
-    init_point = pref["response"]["init_point"]
+    init_point = pref["init_point"]
 
     return redirect(init_point)
 
