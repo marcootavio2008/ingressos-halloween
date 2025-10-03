@@ -43,21 +43,23 @@ def buy():
 
     # cria preferência Mercado Pago
     preference_data = {
-        "items": [
-            {
-                "title": "Ingresso Baile Halloween 🎃",
-                "quantity": 1,
-                "unit_price": 5.0
-            }
-        ],
-        "payer": {"name": name},
-        "back_urls": {
-            "success": url_for("success", ticket_id=ticket_id, _external=True),
-            "failure": url_for("failure", _external=True),
-            "pending": url_for("pending", _external=True)
-        },
-        "auto_return": "approved",
-    }
+    "items": [
+        {"title": "Ingresso Baile Halloween 🎃", 
+         "quantity": 1, 
+         "unit_price": 5.0}],
+        
+    "payer": {"name": name},
+        
+    "external_reference": ticket_id,  # <<< adiciona aqui
+        
+    "back_urls": {
+        "success": url_for("success", _external=True),
+        "failure": url_for("failure", _external=True),
+        "pending": url_for("pending", _external=True)
+    },
+    "auto_return": "approved"
+}
+
 
     pref = sdk.preference().create(preference_data)
     init_point = pref["response"]["init_point"]
@@ -84,10 +86,13 @@ def webhook():
 
     return jsonify({"status": "ok"})
 
-
 @app.route("/success")
 def success():
-    ticket_id = request.args.get("ticket_id")
+    # Mercado Pago adiciona 'external_reference' na URL
+    ticket_id = request.args.get("external_reference")
+    if not ticket_id or ticket_id not in tickets:
+        return "Ingresso inválido ❌", 404
+
     return redirect(url_for("ingresso", ticket_id=ticket_id))
 
 
