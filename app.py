@@ -32,7 +32,7 @@ def buy():
     age = request.form.get("age")
 
     ticket_id = str(uuid.uuid4())
-    tickets[ticket_id] = {"nome": nome, "idade": idade, "status": "aguardando"}
+    tickets[ticket_id] = {"nome": name, "idade": age, "status": "aguardando"}
 
     if not sdk:
         flash("Erro: Mercado Pago não configurado.", "error")
@@ -83,7 +83,7 @@ def notificacao():
 
 @app.route("/success")
 def success():
-    return redirect(url_for("ingresso", ticket_id=ticket_id))
+    return render_template(url_for("success", ticket_id=ticket_id))
 
 @app.route("/failure")
 def failure():
