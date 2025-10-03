@@ -61,7 +61,7 @@ def buy():
 
     return redirect(init_point)
     
-@app.route("/notificacao", methods=["POST"])
+@app.route("/success", methods=["POST"])
 def notificacao():
     data = request.get_json()
     print("Webhook recebido:", data)
