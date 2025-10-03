@@ -40,7 +40,7 @@ def buy():
             {
                 "title": "Ingresso",
                 "quantity": 1,
-                "unit_price": 47.5
+                "unit_price": 5
             }
         ],
         "payer": {"name": name},
