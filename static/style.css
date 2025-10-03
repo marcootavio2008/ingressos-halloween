@@ -26,7 +26,7 @@ header h1 {
 nav a {
   color: #ff6b6b;
   text-decoration: none;
-  font-size: 25px;
+  font-size: 1rem;
   margin: 0 6px;
   position: center;
   text-shadow: 0 0 18px rgb(255 0 255 / 65%), 0 0 36px rgb(122 60 255 / 45%);
