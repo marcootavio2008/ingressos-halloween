@@ -3,3 +3,4 @@ gunicorn
 mercadopago
 qrcode
 uuid
+emailmessage
