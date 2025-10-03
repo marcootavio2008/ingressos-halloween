@@ -1,8 +1,9 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, Response
 import mercadopago
 import uuid
 import qrcode
+import io
 
 app = Flask(__name__)
 app.secret_key = 'cx1228@'  # necessário para flash messages
@@ -11,6 +12,7 @@ app.secret_key = 'cx1228@'  # necessário para flash messages
 MERCADO_TOKEN = "APP_USR-4269419174287132-100118-d5000064cd6d942fc03f594ab2d77212-50261275"
 sdk = mercadopago.SDK(MERCADO_TOKEN)
 
+tickets = {}
 
 @app.route("/")
 def home():
@@ -61,7 +63,7 @@ def buy():
 
     return redirect(init_point)
     
-@app.route("/success", methods=["POST"])
+@app.route("/webhook", methods=["POST"])
 def notificacao():
     data = request.get_json()
     print("Webhook recebido:", data)
@@ -83,7 +85,7 @@ def notificacao():
 
 @app.route("/success")
 def success():
-    return render_template(url_for("success", ticket_id=ticket_id))
+    return render_template(url_for("success", status="Pagamento aprovado ✅"))
 
 @app.route("/failure")
 def failure():
