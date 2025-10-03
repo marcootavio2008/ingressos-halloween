@@ -28,7 +28,7 @@ nav a {
   text-decoration: none;
   margin: 0 6px;
   position: center;
-  box-shadow:4 4px 14px rgba(1,1,1,0.8);
+  text-shadow: 0 0 18px rgb(255 0 255 / 65%), 0 0 36px rgb(122 60 255 / 45%);
 }
 
 nav a:hover {
