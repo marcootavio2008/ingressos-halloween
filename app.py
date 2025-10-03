@@ -17,10 +17,10 @@ sdk = mercadopago.SDK(MERCADO_TOKEN)
 tickets = {}
 
 # Configuração do email
-EMAIL_FROM = 'seuemail@dominio.com'
-EMAIL_PASS = 'SENHA_DO_EMAIL'
-SMTP_SERVER = 'smtp.dominio.com'
-SMTP_PORT = 465
+EMAIL_FROM = 'acfantasy3@gmail.com'
+EMAIL_PASS = 'qmeszgedxbcpmnws'
+SMTP_SERVER = 'smtp.gmail.com'
+SMTP_PORT = 587
 
 
 @app.route("/")
