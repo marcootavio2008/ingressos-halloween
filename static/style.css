@@ -81,6 +81,21 @@ button:hover {
   background: #ff4040;
 }
 
+.list{ margin:14px 0 0 0; padding:0; list-style:none }
+.list li{ display:flex; gap:10px; align-items:flex-start; margin:10px 0; line-height:1.8 }
+.lead{ font-size:18px; line-height:1.85; color:#f6f5ff; }
+.ico{
+    flex:0 0 26px; height:26px; border-radius:8px;
+    display:grid; place-items:center;
+    font-size:16px; font-weight:700; color:#000;
+    background:linear-gradient(135deg, #ffd18f, #ff7a00);
+    box-shadow:0 0 10px rgba(255,122,0,.35);
+  }
+.ico.purple{
+    background:linear-gradient(135deg, #d3c6ff, #7a3cff);
+    color:#fff; box-shadow:0 0 10px rgba(122,60,255,.35);
+  }
+
 /* ===== Mensagens ===== */
 .note {
   background: #101820;
