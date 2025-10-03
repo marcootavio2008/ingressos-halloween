@@ -1,3 +1,5 @@
 Flask
 gunicorn
 mercadopago
+qrcode
+uuid
