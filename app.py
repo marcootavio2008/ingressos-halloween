@@ -1,18 +1,19 @@
-import os
-from flask import Flask, render_template, request, redirect, url_for, flash, Response
-import mercadopago
-import uuid
-import qrcode
 import io
+import uuid
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response
+import mercadopago
+import qrcode
 
 app = Flask(__name__)
 app.secret_key = 'cx1228@'  # necessário para flash messages
 
-# coloque seu access token (sandbox ou produção) no ambiente
+# Mercado Pago SDK
 MERCADO_TOKEN = "APP_USR-4269419174287132-100118-d5000064cd6d942fc03f594ab2d77212-50261275"
 sdk = mercadopago.SDK(MERCADO_TOKEN)
 
+# Banco de ingressos em memória
 tickets = {}
+
 
 @app.route("/")
 def home():
@@ -33,27 +34,27 @@ def buy():
     name = request.form.get("name")
     age = request.form.get("age")
 
+    if not name or not age:
+        flash("Nome e idade são obrigatórios!", "error")
+        return redirect(url_for("buy"))
+
     ticket_id = str(uuid.uuid4())
     tickets[ticket_id] = {"nome": name, "idade": age, "status": "aguardando"}
 
-    if not sdk:
-        flash("Erro: Mercado Pago não configurado.", "error")
-        return redirect(url_for("buy"))
-
-    # cria preferência
+    # cria preferência Mercado Pago
     preference_data = {
         "items": [
             {
-                "title": "Ingresso",
+                "title": "Ingresso Baile Halloween 🎃",
                 "quantity": 1,
-                "unit_price": 5
+                "unit_price": 5.0
             }
         ],
         "payer": {"name": name},
         "back_urls": {
-            "success": url_for("success", _external=True),
+            "success": url_for("success", ticket_id=ticket_id, _external=True),
             "failure": url_for("failure", _external=True),
-            "pending": url_for("pending", _external=True),
+            "pending": url_for("pending", _external=True)
         },
         "auto_return": "approved",
     }
@@ -62,9 +63,11 @@ def buy():
     init_point = pref["response"]["init_point"]
 
     return redirect(init_point)
-    
+
+
+# Webhook Mercado Pago
 @app.route("/webhook", methods=["POST"])
-def notificacao():
+def webhook():
     data = request.get_json()
     print("Webhook recebido:", data)
 
@@ -73,8 +76,7 @@ def notificacao():
         payment = sdk.payment().get(payment_id)
 
         if payment and payment["response"]["status"] == "approved":
-            # Atualiza ticket como pago
-            # Aqui seria melhor associar com "external_reference"
+            # Atualiza ingresso como pago
             for t_id, info in tickets.items():
                 if info["status"] == "aguardando":
                     tickets[t_id]["status"] = "pago"
@@ -85,15 +87,19 @@ def notificacao():
 
 @app.route("/success")
 def success():
-    return render_template(url_for("success", status="Pagamento aprovado ✅"))
+    ticket_id = request.args.get("ticket_id")
+    return redirect(url_for("ingresso", ticket_id=ticket_id))
+
 
 @app.route("/failure")
 def failure():
     return render_template("success.html", status="Pagamento não aprovado ❌")
 
+
 @app.route("/pending")
 def pending():
     return render_template("success.html", status="Pagamento pendente ⏳")
+
 
 @app.route("/ingresso/<ticket_id>")
 def ingresso(ticket_id):
@@ -102,6 +108,7 @@ def ingresso(ticket_id):
 
     ticket = tickets[ticket_id]
     return render_template("ticket.html", ticket=ticket, ticket_id=ticket_id)
+
 
 @app.route("/qrcode/<ticket_id>")
 def qrcode_img(ticket_id):
@@ -115,6 +122,7 @@ def qrcode_img(ticket_id):
     buf.seek(0)
 
     return Response(buf, mimetype="image/png")
+
 
 @app.route("/validar/<ticket_id>")
 def validar(ticket_id):
