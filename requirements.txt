@@ -4,3 +4,4 @@ mercadopago
 qrcode
 emailmessage
 pillow
+base64
