@@ -11,6 +11,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 import mercadopago
 import PIL
+import threading
+
 
 app = Flask(__name__)
 app.secret_key = 'cx1228@'
@@ -18,6 +20,7 @@ app.secret_key = 'cx1228@'
 # Configuração Mercado Pago
 MERCADO_TOKEN = "APP_USR-4269419174287132-100118-d5000064cd6d942fc03f594ab2d77212-50261275"
 sdk = mercadopago.SDK(MERCADO_TOKEN)
+
 
 # Função para gerar QR Code em memória
 def gerar_qrcode(conteudo):
@@ -53,6 +56,43 @@ def enviar_email_com_qrcode(destinatario, corpo, qr_buffer):
         print("Email com QR Code enviado!")
     except Exception as e:
         print(f"Erro ao enviar email: {e}")
+
+def processar_pagamento(payment_id):
+    try:
+        pagamento = verificar_pagamento(payment_id)
+        if pagamento.get("status") != "approved":
+            print("Pagamento não aprovado.")
+            return
+
+        ref = pagamento.get("external_reference")
+        if not ref:
+            print("Referência externa ausente.")
+            return
+
+        try:
+            params = dict(x.split("=") for x in ref.split("&"))
+        except Exception as e:
+            print(f"Erro ao processar referência: {e}")
+            return
+
+        name = params.get("name")
+        age = params.get("age")
+        email = params.get("email")
+
+        dados = {"name": name, "age": age, "email": email}
+        url_base = "https://ingressos-halloween.onrender.com/ingresso"
+        url_com_dados = f"{url_base}?{urlencode(dados)}"
+        qr_buffer = gerar_qrcode(url_com_dados)
+
+        enviar_email_com_qrcode(
+            destinatario=email,
+            corpo="Segue o QR code para identificação na portaria do evento!",
+            qr_buffer=qr_buffer
+        )
+        print("Email enviado com sucesso.")
+    except Exception as e:
+        print(f"Erro ao processar pagamento: {e}")
+
 
 # Rota inicial
 @app.route("/")
@@ -107,34 +147,12 @@ def notificacao():
         return "Ignorado", 400
 
     payment_id = data["data"]["id"]
-    pagamento = verificar_pagamento(payment_id)
 
-    if pagamento.get("status") == "approved":
-        ref = pagamento.get("external_reference")
-        if not ref:
-            return "Referência externa ausente", 400
-        try:
-            params = dict(x.split("=") for x in ref.split("&"))
-        except Exception as e:
-            return f"Erro ao processar referência: {e}", 400
+    # Inicia processamento em segundo plano
+    threading.Thread(target=processar_pagamento, args=(payment_id,)).start()
 
-        name = params.get("name")
-        age = params.get("age")
-        email = params.get("email")
-
-        dados = {"name": name, "age": age, "email": email}
-        url_base = "https://ingressos-halloween.onrender.com/ingresso"
-        url_com_dados = f"{url_base}?{urlencode(dados)}"
-        qr_buffer = gerar_qrcode(url_com_dados)
-
-        enviar_email_com_qrcode(
-            destinatario=email,
-            corpo="Segue o QR code para identificação na portaria do evento!",
-            qr_buffer=qr_buffer
-        )
-        return "Email enviado", 200
-
-    return "Pagamento não aprovado", 200
+    # Responde imediatamente ao Mercado Pago
+    return "Recebido", 200
 
 # Rota de sucesso
 @app.route("/success")
