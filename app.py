@@ -136,13 +136,13 @@ def success():
 @app.route("/ingresso")
 def ingresso():
     nome = request.args.get("name")
-    email = request.args.get("email")
+    email = request.args.get("email_destiny")
     data = request.args.get("age")
 
-    if not all([id, nome, email, data]):
+    if not all([id, nome, email_destiny, data]):
         return "Dados incompletos", 400
 
-    return render_template("ingresso.html", name=name, email=email, age=age)
+    return render_template("ingresso.html", name=name, email_destiny=email_destiny, age=age)
 
 @app.route("/failure")
 def failure():
