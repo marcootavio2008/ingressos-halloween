@@ -4,4 +4,3 @@ mercadopago
 qrcode
 emailmessage
 pillow
-threading
