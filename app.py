@@ -84,7 +84,7 @@ def buy():
             {
                 "title": "Ingresso Halloween",
                 "quantity": 1,
-                "unit_price": 45
+                "unit_price": 5
             }
         ],
         "payer": {"name": name},
