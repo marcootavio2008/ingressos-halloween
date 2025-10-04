@@ -10,6 +10,7 @@ import uuid
 import qrcode
 import io
 from urllib.parse import urlencode
+import PIL
 
 def gerar_qrcode(conteudo):
     img = qrcode.make(conteudo)
