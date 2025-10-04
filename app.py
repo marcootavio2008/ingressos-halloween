@@ -47,7 +47,7 @@ def enviar_email_com_qrcode(destinatario, corpo, qr_buffer):
     imagem = MIMEImage(qr_buffer.read(), name="qrcode.png")
     msg.attach(imagem)
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 587) as server:
             server.login(remetente, senha)
             server.sendmail(remetente, destinatario, msg.as_string())
         print("Email com QR Code enviado!")
