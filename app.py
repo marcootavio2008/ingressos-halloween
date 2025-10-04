@@ -14,7 +14,8 @@ import PIL
 
 def gerar_qrcode(conteudo):
     img = qrcode.make(conteudo)
-    buffer = io.BytesIO()
+    arquivo_io = io.BytesIO()
+    buffer = arquivo_io.getvalue()
     img.save(buffer, format="PNG")
     buffer.seek(0)
     return buffer
