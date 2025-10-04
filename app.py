@@ -100,7 +100,7 @@ def buy():
         "items": [{
             "title": "Ingresso Halloween",
             "quantity": 1,
-            "unit_price": 0.1
+            "unit_price": 45
         }],
         "payer": {"name": name},
         "back_urls": {
