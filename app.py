@@ -1,13 +1,14 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 import mercadopago
+import smtplib
+import email.message
 
 app = Flask(__name__)
 app.secret_key = 'cx1228@'
 
 MERCADO_TOKEN = "APP_USR-4269419174287132-100118-d5000064cd6d942fc03f594ab2d77212-50261275"
 sdk = mercadopago.SDK(MERCADO_TOKEN)
-
 
 @app.route("/")
 def home():
@@ -26,7 +27,7 @@ def buy():
 
     name = request.form.get("name")
     age = request.form.get("age")
-    ticket_type = request.form.get("ticket_type", "comum")
+    email = request.form.get("email")
 
     if not sdk:
         flash("Erro: Mercado Pago não configurado.", "error")
@@ -59,6 +60,23 @@ def buy():
 @app.route("/success")
 def success():
     return render_template("success.html", status="Pagamento aprovado 🎉")
+    msg = email.message.Message()
+    msg['Subject'] = 'Ingresso Halloween'
+    msg['From'] = 'acfantasy3@gmail.com'
+    for nome, email_pessoa in emails.items():
+        if pessoa.lower().strip() in nome.lower():
+            msg['To'] = email
+            password = 'hkcaouharwcfxpyj'
+            msg.add_header('Content-Type', 'text/html')
+            msg.set_payload("Segue o QR code para apresentar na portaria do evnto")
+            with open('frame.png', 'rb') as fp:
+                img_data = fp.read()
+            msg.add_attachment(img_data, maintype='image', subtype='png', filename='frame.png')
+            s = smtplib.SMTP('smtp.gmail.com: 587')
+            s.starttls()
+            s.login(msg['From'], password)
+            s.sendmail(msg['From'], [msg['To']], msg.as_string().encode('utf-8'))
+            
 
 
 @app.route("/failure")
