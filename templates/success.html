@@ -1,6 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>{{ status }}</h2>
-<p>Verifique seu <strong>email</strong> para confirmação no dia do evento</p>
+
+{% if name %}
+        <p>Nome: {{ name }}</p>
+        <p>Email: {{ email }}</p>
+        <p>Idade: {{ age }}</p>
+
+        <h2>QR Code para entrada</h2>
+        <img id="qrImage" src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width:300px;height:300px;">
+        <br>
+        <a id="downloadLink" download="qrcode_{{ name }}.png">📥 Baixar QR Code</a>
+
+        <script>
+            const qrImage = document.getElementById('qrImage');
+            const downloadLink = document.getElementById('downloadLink');
+            downloadLink.href = qrImage.src;
+        </script>
+    {% else %}
+        <p>Seu pagamento foi aprovado. Verifique seu e-mail para mais detalhes.</p>
+    {% endif %}
+
 <a href="{{ url_for('about') }}"><button>Voltar</button></a>
 {% endblock %}
