@@ -4,20 +4,20 @@ import io
 import qrcode
 import requests
 import smtplib
+import base64
+import threading
 from urllib.parse import urlencode
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 import mercadopago
 import PIL
-import threading
-import base64
-
 
 app = Flask(__name__)
 app.secret_key = 'cx1228@'
 
+# Função para gerar QR Code em memória
 def gerar_qrcode(conteudo): 
     img = qrcode.make(conteudo) 
     buffer = io.BytesIO() 
@@ -29,7 +29,6 @@ def gerar_qrcode(conteudo):
 MERCADO_TOKEN = "APP_USR-4269419174287132-100118-d5000064cd6d942fc03f594ab2d77212-50261275"
 sdk = mercadopago.SDK(MERCADO_TOKEN)
 
-
 # Função para verificar status do pagamento
 def verificar_pagamento(payment_id):
     url = f"https://api.mercadopago.com/v1/payments/{payment_id}"
@@ -37,6 +36,7 @@ def verificar_pagamento(payment_id):
     response = requests.get(url, headers=headers)
     return response.json()
 
+# Função de processamento de pagamento
 def processar_pagamento(payment_id):
     try:
         pagamento = verificar_pagamento(payment_id)
@@ -55,8 +55,10 @@ def processar_pagamento(payment_id):
             print(f"Erro ao processar referência: {e}")
             return
 
-       
-        
+        # Aqui você pode adicionar lógica adicional se quiser
+        print("Pagamento aprovado e processado.")
+    except Exception as e:
+        print(f"Erro ao processar pagamento: {e}")
 
 # Rota inicial
 @app.route("/")
@@ -82,6 +84,18 @@ def buy():
         return redirect(url_for("buy"))
 
     # Cria preferência de pagamento
+    dados = {"name": name, "age": age, "email": email}
+    url_base = "https://ingressos-halloween.onrender.com/ingresso"
+    url_com_dados = f"{url_base}?{urlencode(dados)}"
+    qr_buffer = gerar_qrcode(url_com_dados)
+    qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode("utf-8")
+
+    # Salvar dados na sessão
+    session["name"] = name
+    session["age"] = age
+    session["email"] = email
+    session["qr_code"] = qr_base64
+
     preference_data = {
         "items": [{
             "title": "Ingresso Halloween",
@@ -96,24 +110,11 @@ def buy():
         },
         "auto_return": "approved",
         "notification_url": "https://ingressos-halloween.onrender.com/notificacao",
-        "external_reference": urlencode({"name": name, "age": age, "email": email})
+        "external_reference": urlencode(dados)
     }
 
     pref = sdk.preference().create(preference_data)
     init_point = pref["response"]["init_point"]
-    return redirect(init_point)
-    dados = {"name": name, "age": age, "email": email}
-    url_base = "https://ingressos-halloween.onrender.com/ingresso"
-    url_com_dados = f"{url_base}?{urlencode(dados)}"
-    qr_buffer = gerar_qrcode(url_com_dados)
-    qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode("utf-8")
-
-    # Salvar dados na sessão
-    session["name"] = name
-    session["age"] = age
-    session["email"] = email
-    session["qr_code"] = qr_base64
-
     return redirect(init_point)
 
 # Rota de notificação do Mercado Pago
@@ -124,11 +125,7 @@ def notificacao():
         return "Ignorado", 400
 
     payment_id = data["data"]["id"]
-
-    # Inicia processamento em segundo plano
     threading.Thread(target=processar_pagamento, args=(payment_id,)).start()
-
-    # Responde imediatamente ao Mercado Pago
     return "Recebido", 200
 
 # Rota de sucesso
@@ -144,8 +141,7 @@ def success():
 
     return render_template("success.html", name=name, age=age, email=email, qr_code=qr_code)
 
-
-
+# Rota de ingresso
 @app.route("/ingresso")
 def ingresso():
     name = request.args.get("name")
@@ -162,8 +158,6 @@ def ingresso():
     qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode("utf-8")
 
     return render_template("ingresso.html", name=name, email=email, age=age, qr_code=qr_base64)
-
-
 
 # Rotas de falha e pendente
 @app.route("/failure")
