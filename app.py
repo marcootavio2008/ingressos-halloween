@@ -107,6 +107,7 @@ def buy():
 
 @app.route("/notificacao", methods=["POST"])
 def notificacao():
+    global name, age, email_destiny
     data = request.json
     if not data or "data" not in data or "id" not in data["data"]:
         return "Ignorado", 400
