@@ -12,23 +12,23 @@ from email.mime.image import MIMEImage
 import mercadopago
 import PIL
 import threading
+import base64
 
 
 app = Flask(__name__)
 app.secret_key = 'cx1228@'
 
+def gerar_qrcode(conteudo): 
+    img = qrcode.make(conteudo) 
+    buffer = io.BytesIO() 
+    img.save(buffer, format="PNG") 
+    buffer.seek(0) 
+    return buffer
+
 # Configuração Mercado Pago
 MERCADO_TOKEN = "APP_USR-4269419174287132-100118-d5000064cd6d942fc03f594ab2d77212-50261275"
 sdk = mercadopago.SDK(MERCADO_TOKEN)
 
-
-# Função para gerar QR Code em memória
-def gerar_qrcode(conteudo):
-    img = qrcode.make(conteudo)
-    buffer = io.BytesIO()
-    img.save(buffer, format="PNG")
-    buffer.seek(0)
-    return buffer
 
 # Função para verificar status do pagamento
 def verificar_pagamento(payment_id):
@@ -36,26 +36,6 @@ def verificar_pagamento(payment_id):
     headers = {"Authorization": f"Bearer {MERCADO_TOKEN}"}
     response = requests.get(url, headers=headers)
     return response.json()
-
-# Função para enviar e-mail com QR Code
-def enviar_email_com_qrcode(destinatario, corpo, qr_buffer):
-    remetente = "acfantasy3@gmail.com"
-    senha = "hkcaouharwcfxpyj"
-
-    msg = MIMEMultipart()
-    msg["Subject"] = "Ingressos Halloween"
-    msg["From"] = remetente
-    msg["To"] = destinatario
-    msg.attach(MIMEText(corpo, "plain"))
-    imagem = MIMEImage(qr_buffer.read(), name="qrcode.png")
-    msg.attach(imagem)
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 587) as server:
-            server.login(remetente, senha)
-            server.sendmail(remetente, destinatario, msg.as_string())
-        print("Email com QR Code enviado!")
-    except Exception as e:
-        print(f"Erro ao enviar email: {e}")
 
 def processar_pagamento(payment_id):
     try:
@@ -75,24 +55,8 @@ def processar_pagamento(payment_id):
             print(f"Erro ao processar referência: {e}")
             return
 
-        name = params.get("name")
-        age = params.get("age")
-        email = params.get("email")
-
-        dados = {"name": name, "age": age, "email": email}
-        url_base = "https://ingressos-halloween.onrender.com/ingresso"
-        url_com_dados = f"{url_base}?{urlencode(dados)}"
-        qr_buffer = gerar_qrcode(url_com_dados)
-
-        enviar_email_com_qrcode(
-            destinatario=email,
-            corpo="Segue o QR code para identificação na portaria do evento!",
-            qr_buffer=qr_buffer
-        )
-        print("Email enviado com sucesso.")
-    except Exception as e:
-        print(f"Erro ao processar pagamento: {e}")
-
+       
+        
 
 # Rota inicial
 @app.route("/")
@@ -138,6 +102,19 @@ def buy():
     pref = sdk.preference().create(preference_data)
     init_point = pref["response"]["init_point"]
     return redirect(init_point)
+    dados = {"name": name, "age": age, "email": email}
+    url_base = "https://ingressos-halloween.onrender.com/ingresso"
+    url_com_dados = f"{url_base}?{urlencode(dados)}"
+    qr_buffer = gerar_qrcode(url_com_dados)
+    qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode("utf-8")
+
+    # Salvar dados na sessão
+    session["name"] = name
+    session["age"] = age
+    session["email"] = email
+    session["qr_code"] = qr_base64
+
+    return redirect(init_point)
 
 # Rota de notificação do Mercado Pago
 @app.route("/notificacao", methods=["POST"])
@@ -157,9 +134,18 @@ def notificacao():
 # Rota de sucesso
 @app.route("/success")
 def success():
-    return render_template("success.html", status="Pagamento aprovado 🎉")
+    name = session.get("name")
+    age = session.get("age")
+    email = session.get("email")
+    qr_code = session.get("qr_code")
 
-# Rota de ingresso via QR Code
+    if not all([name, age, email, qr_code]):
+        return render_template("success.html", status="Pagamento aprovado 🎉")
+
+    return render_template("success.html", name=name, age=age, email=email, qr_code=qr_code)
+
+
+
 @app.route("/ingresso")
 def ingresso():
     name = request.args.get("name")
@@ -169,7 +155,15 @@ def ingresso():
     if not all([name, email, age]):
         return "Dados incompletos", 400
 
-    return render_template("ingresso.html", name=name, email=email, age=age)
+    dados = {"name": name, "age": age, "email": email}
+    url_base = "https://ingressos-halloween.onrender.com/ingresso"
+    url_com_dados = f"{url_base}?{urlencode(dados)}"
+    qr_buffer = gerar_qrcode(url_com_dados)
+    qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode("utf-8")
+
+    return render_template("ingresso.html", name=name, email=email, age=age, qr_code=qr_base64)
+
+
 
 # Rotas de falha e pendente
 @app.route("/failure")
