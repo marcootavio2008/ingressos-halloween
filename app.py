@@ -110,8 +110,14 @@ def notificacao():
     pagamento = verificar_pagamento(payment_id)
 
     if pagamento.get("status") == "approved":
-        ref = pagamento.get("external_reference", "")
-        params = dict(x.split("=") for x in ref.split("&"))
+        ref = pagamento.get("external_reference")
+        if not ref:
+            return "Referência externa ausente", 400
+        try:
+            params = dict(x.split("=") for x in ref.split("&"))
+        except Exception as e:
+            return f"Erro ao processar referência: {e}", 400
+
         name = params.get("name")
         age = params.get("age")
         email = params.get("email")
