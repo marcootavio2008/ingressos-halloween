@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Ingresso Confirmado</h1>
-<p><strong>Nome:</strong> {{ nome }}</p>
+<p><strong>Nome:</strong> {{ name }}</p>
 <p><strong>Email:</strong> {{ email }}</p>
-<p><strong>Idade:</strong> {{ data }}</p>
+<p><strong>Idade:</strong> {{ age }}</p>
 <a href="{{ url_for('about') }}"><button>Voltar</button></a>
 {% endblock %}
